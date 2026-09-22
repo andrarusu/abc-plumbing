@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ABC Plumbing portfolio demonstration: interactive example price ranges and estimate calculator.">
+  <title>Example Prices &amp; Estimate | ABC Plumbing</title>
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+  <link href="css/style.css" rel="stylesheet">
+  <style>
+    /* Price-page styles are scoped so the shared homepage navbar keeps its original appearance. */
+    :root { color-scheme: light; --price-teal:#167d91; --price-deep:#103d4d; --price-ink:#18323e; --price-muted:#526b78; --price-bg:#f4f8fa; --price-line:#d7e6eb; }
+    html { scroll-behavior: smooth; }
+    body.prices-page { background:var(--price-bg); color:var(--price-ink); }
+    .prices-content, .prices-footer { font: 16px/1.55 system-ui,-apple-system,Segoe UI,Arial,sans-serif; }
+    .prices-content *, .prices-footer * { box-sizing:border-box; }
+    .prices-shell { width:min(1140px,calc(100% - 2rem)); margin-inline:auto; }
+    .navbar .nav-link[aria-current="page"] { color:var(--price-teal); font-weight:700; }
+    .prices-content a, .prices-footer a { color:inherit; }
+    .prices-content a:hover, .prices-content a:focus-visible, .prices-footer a:hover, .prices-footer a:focus-visible { color:var(--price-teal); }
+    .prices-content button, .prices-content select { font:inherit; }
+    .prices-hero { padding:3.7rem 0 2.25rem; }
+    .prices-content .eyebrow { margin:0 0 .65rem; color:var(--price-teal); font-size:.75rem; font-weight:850; text-transform:uppercase; letter-spacing:.16em; }
+    .prices-content h1 { font-size:clamp(2.1rem,5vw,3.8rem); line-height:1.12; letter-spacing:-.045em; margin:0 0 1rem; max-width:15ch; }
+    .prices-hero p:last-of-type { color:var(--price-muted); font-size:1.08rem; max-width:65ch; }
+    .prices-content .notice { border-left:4px solid var(--price-teal); background:#e7f4f6; padding:1rem 1.2rem; border-radius:0 .7rem .7rem 0; margin:1.35rem 0 0; max-width:850px; }
+    .prices-content section { margin-bottom:3.2rem; }
+    .prices-content h2 { margin:0 0 .35rem; font-size:clamp(1.55rem,3.5vw,2.15rem); letter-spacing:-.035em; }
+    .prices-content .section-intro { margin:.15rem 0 1.35rem; color:var(--price-muted); }
+    .prices-content .cards { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+    .prices-content .price-card { display:flex; flex-direction:column; gap:.65rem; border:1px solid var(--price-line); background:#fff; border-radius:1.1rem; padding:1.4rem; box-shadow:0 5px 20px rgba(16,61,77,.045); }
+    .prices-content .price-card h3 { font-size:1.18rem; line-height:1.3; margin:0; }
+    .prices-content .price-card p { margin:0; color:var(--price-muted); }
+    .prices-content .price-card .price { font-size:1.45rem; font-weight:800; letter-spacing:-.025em; color:var(--price-deep); }
+    .prices-content .tag { display:inline-block; align-self:flex-start; color:var(--price-teal); background:#e7f4f6; font-size:.72rem; font-weight:800; border-radius:99px; padding:.27rem .65rem; }
+    .prices-content .price-card button { margin-top:auto; align-self:flex-start; border:0; color:var(--price-teal); background:transparent; font-weight:800; cursor:pointer; padding:.35rem 0; text-align:left; text-decoration:underline; text-underline-offset:3px; }
+    .prices-content .price-card button:hover, .prices-content .price-card button:focus-visible { color:var(--price-deep); }
+    .prices-content .estimate { display:grid; grid-template-columns:minmax(0,1.1fr) minmax(280px,.9fr); border:1px solid var(--price-line); border-radius:1.2rem; overflow:hidden; background:#fff; box-shadow:0 8px 24px rgba(16,61,77,.055); }
+    .prices-content .estimate-form { padding:clamp(1.25rem,4vw,2.2rem); }
+    .prices-content .field { margin-bottom:1.15rem; }
+    .prices-content label { display:block; font-weight:750; margin-bottom:.4rem; }
+    .prices-content select { width:100%; border:1px solid #9eb7c2; border-radius:.7rem; padding:.7rem 2.4rem .7rem .8rem; background:#fff; color:var(--price-ink); }
+    .prices-content select:focus-visible, .prices-content button:focus-visible, .prices-content a:focus-visible { outline:3px solid #74c4d3; outline-offset:3px; }
+    .prices-content .field-help { margin:.4rem 0 0; color:var(--price-muted); font-size:.85rem; }
+    .prices-content .estimate-result { display:flex; flex-direction:column; justify-content:center; background:var(--price-deep); color:#fff; padding:clamp(1.4rem,4vw,2.4rem); }
+    .prices-content .estimate-result .eyebrow { color:#a8e5ef; }
+    .prices-content .amount { font-size:clamp(2rem,4vw,2.8rem); font-weight:850; line-height:1.18; letter-spacing:-.035em; margin:.3rem 0 .75rem; }
+    .prices-content .estimate-result p { color:#d5eaf0; }
+    .prices-content .price-button { display:inline-flex; justify-content:center; align-items:center; gap:.4rem; border:1px solid var(--price-teal); background:var(--price-teal); color:#fff; border-radius:.75rem; padding:.68rem 1rem; font-weight:750; text-decoration:none; cursor:pointer; }
+    .prices-content .estimate-result .price-button { background:#fff; color:var(--price-deep); border-color:#fff; align-self:flex-start; margin-top:.65rem; }
+    .prices-content .estimate-result .price-button:hover, .prices-content .estimate-result .price-button:focus-visible { background:#dcf4f7; border-color:#dcf4f7; color:var(--price-deep); }
+    .prices-content .fine-print { font-size:.85rem; color:var(--price-muted); margin-top:1rem; }
+    .prices-content .steps { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:1rem; }
+    .prices-content .step { border-top:2px solid var(--price-teal); padding:1rem .2rem; }
+    .prices-content .step strong { display:block; margin-bottom:.4rem; }
+    .prices-content .step p { color:var(--price-muted); margin:0; }
+    .prices-footer { border-top:1px solid var(--price-line); background:#fff; padding:1.6rem 0; color:var(--price-muted); font-size:.9rem; }
+    .prices-footer .prices-shell { display:flex; flex-wrap:wrap; gap:.6rem; align-items:center; justify-content:space-between; }
+    @media(max-width:860px) { .prices-content .cards { grid-template-columns:repeat(2,minmax(0,1fr)); } .prices-content .estimate { grid-template-columns:1fr; } }
+    @media(max-width:550px) { .prices-content .cards, .prices-content .steps { grid-template-columns:1fr; } .prices-hero { padding-top:2.3rem; } }
+
+    /* The title arrives from the left on initial page load; subsequent sections still reveal on scroll. */
+    .prices-hero > .eyebrow {
+      animation: pricesHeroAppear .65s ease-out .05s both;
+    }
+    .prices-hero > h1 {
+      animation: pricesTitleFromLeft .9s cubic-bezier(.2,.75,.2,1) .15s both;
+    }
+    .prices-hero > p:not(.eyebrow) {
+      animation: pricesHeroAppear .7s ease-out .4s both;
+    }
+    .prices-hero > .notice {
+      animation: pricesHeroAppear .7s ease-out .55s both;
+    }
+    @keyframes pricesTitleFromLeft {
+      from { opacity: 0; transform: translate3d(-48px, 0, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    @keyframes pricesHeroAppear {
+      from { opacity: 0; transform: translate3d(0, 12px, 0); }
+      to { opacity: 1; transform: translate3d(0, 0, 0); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .prices-hero > .eyebrow,
+      .prices-hero > h1,
+      .prices-hero > p:not(.eyebrow),
+      .prices-hero > .notice { animation: none !important; }
+    }
+
+    /* Same gentle scroll reveal as ABC Plumbing's homepage. Content stays visible without JS. */
+    html.abc-reveal-enabled .prices-content .abc-reveal-item {
+      transition: opacity .7s ease, transform .7s cubic-bezier(.2,.75,.2,1);
+      transition-delay: var(--abc-reveal-delay, 0ms);
+    }
+    html.abc-reveal-enabled .prices-content .abc-reveal-item:not(.abc-reveal-visible) {
+      opacity: 0;
+      transform: translate3d(0, 24px, 0);
+    }
+    /* Explore services and its first three cards glide in from the left. */
+    html.abc-reveal-enabled .prices-content .abc-reveal-item.prices-slide-left:not(.abc-reveal-visible) {
+      transform: translate3d(-48px, 0, 0);
+    }
+    html.abc-reveal-enabled .prices-content .abc-reveal-item.abc-reveal-visible {
+      opacity: 1;
+      transform: translate3d(0, 0, 0);
+    }
+    @media (prefers-reduced-motion: reduce) {
+      html.abc-reveal-enabled .prices-content .abc-reveal-item {
+        transition: none !important;
+        opacity: 1 !important;
+        transform: none !important;
+      }
+    }
+  </style>
+</head>
+<body class="prices-page">
+<nav class="navbar navbar-expand-lg bg-white sticky-top" aria-label="Main navigation">
+
+
+
+    <div class="container">
+
+
+
+
+
+        <!-- LOGO -->
+
+
+
+        <a
+
+            class="navbar-brand logo"
+
+            href="index.html#home"
+
+            aria-label="ABC Plumbing Services home"
+
+        >
+
+
+
+            <span class="logo-main">
+
+                ABC
+
+            </span>
+
+
+
+            <span class="logo-small">
+
+                PLUMBING SERVICES
+
+            </span>
+
+
+
+        </a>
+
+
+
+
+
+
+
+        <!-- MOBILE BURGER -->
+
+
+
+        <button
+
+            class="navbar-toggler"
+
+            type="button"
+
+            data-bs-toggle="collapse"
+
+            data-bs-target="#mainNavbar"
+
+            aria-controls="mainNavbar"
+
+            aria-expanded="false"
+
+            aria-label="Toggle navigation"
+
+        >
+
+
+
+            <span class="navbar-toggler-icon"></span>
+
+
+
+        </button>
+
+
+
+
+
+
+
+        <!-- NAVIGATION -->
+
+
+
+        <div
+
+            class="collapse navbar-collapse"
+
+            id="mainNavbar"
+
+        >
+
+
+
+            <ul class="navbar-nav ms-auto align-items-lg-center">
+
+
+
+
+
+                <li class="nav-item">
+
+
+
+                    <a
+
+                        class="nav-link"
+
+                        href="index.html#home"
+
+                    >
+
+                        Home
+
+                    </a>
+
+
+
+                </li>
+
+
+
+
+
+                <li class="nav-item">
+
+
+
+                    <a
+
+                        class="nav-link"
+
+                        href="index.html#services"
+
+                    >
+
+                        Services
+
+                    </a>
+
+
+
+                </li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="prices.html" aria-current="page">
+                        Prices &amp; Estimates
+                    </a>
+                </li>
+
+
+
+
+
+                <li class="nav-item">
+
+
+
+                    <a
+
+                        class="nav-link"
+
+                        href="index.html#about"
+
+                    >
+
+                        About
+
+                    </a>
+
+
+
+                </li>
+
+
+
+
+
+                <li class="nav-item">
+
+
+
+                    <a
+
+                        class="nav-link"
+
+                        href="index.html#reviews"
+
+                    >
+
+                        Reviews
+
+                    </a>
+
+
+
+                </li>
+
+
+
+
+
+                <li class="nav-item">
+
+
+
+                    <a
+
+                        class="nav-link"
+
+                        href="index.html#areas"
+
+                    >
+
+                        Service Areas
+
+                    </a>
+
+
+
+                </li>
+
+
+
+                <li class="nav-item">
+
+                    <a class="nav-link staff-link" href="staff_login.php">
+
+                        Staff Login
+
+                    </a>
+
+                </li>
+
+
+
+                <li class="nav-item ms-lg-3">
+
+
+
+                    <a class="btn nav-quote-button" href="index.html#home" title="Go to the homepage to request a quote">Request a Quote</a>
+
+
+
+                </li>
+
+
+
+
+
+            </ul>
+
+
+
+        </div>
+
+
+
+    </div>
+
+
+
+</nav>
+<main class="prices-content">
+  <div class="prices-shell">
+    <div class="prices-hero">
+      <p class="eyebrow">ABC Plumbing · Portfolio demo</p>
+      <h1>Clear example prices. No surprises.</h1>
+      <p>Explore sample service ranges and try an interactive estimate calculator. For an actual request in this demo, use the quote form on the homepage.</p>
+      <div class="notice" role="note"><strong>Illustrative figures only.</strong> ABC Plumbing is a portfolio demonstration, not a live plumbing business. Every price below is invented for the demo—not a real quote, market-rate claim or promise of service.</div>
+    </div>
+
+    <section aria-labelledby="prices-heading">
+      <p class="eyebrow">Sample price guide</p>
+      <h2 id="prices-heading" class="prices-slide-left">Explore services</h2>
+      <p class="section-intro">These fictional base ranges represent a standard, small job before the calculator's example adjustments.</p>
+      <div class="cards">
+        <article class="price-card prices-slide-left"><span class="tag">Demo base range</span><h3>Leak Repairs</h3><p>Example repair of an accessible leak.</p><div class="price">£65–£115</div><button type="button" data-select-service="Leak Repairs">Estimate this service →</button></article>
+        <article class="price-card prices-slide-left"><span class="tag">Demo base range</span><h3>Drain Cleaning</h3><p>Example clearing of a simple blockage.</p><div class="price">£75–£140</div><button type="button" data-select-service="Drain Cleaning">Estimate this service →</button></article>
+        <article class="price-card prices-slide-left"><span class="tag">Demo base range</span><h3>Boiler Service</h3><p>Example routine service; no gas work is offered by this demo.</p><div class="price">£85–£135</div><button type="button" data-select-service="Boiler Service">Estimate this service →</button></article>
+        <article class="price-card"><span class="tag">Demo base range</span><h3>Bathroom Plumbing</h3><p>Example small fixture or bathroom repair.</p><div class="price">£110–£210</div><button type="button" data-select-service="Bathroom Plumbing">Estimate this service →</button></article>
+        <article class="price-card"><span class="tag">Demo base range</span><h3>Pipe Installation</h3><p>Example short, accessible pipe section.</p><div class="price">£100–£190</div><button type="button" data-select-service="Pipe Installation">Estimate this service →</button></article>
+        <article class="price-card"><span class="tag">Demo base range</span><h3>Emergency Plumbing</h3><p>Example emergency visit during standard hours.</p><div class="price">£125–£225</div><button type="button" data-select-service="Emergency Plumbing">Estimate this service →</button></article>
+      </div>
+    </section>
+
+    <section id="estimate" aria-labelledby="estimate-heading">
+      <p class="eyebrow">Interactive demo</p>
+      <h2 id="estimate-heading">Build a sample estimate</h2>
+      <p class="section-intro">Change your choices to update the example price range instantly.</p>
+      <div class="estimate">
+        <form id="estimateForm" class="estimate-form" aria-describedby="estimate-note">
+          <div class="field"><label for="service">Service</label><select id="service" name="service" required>
+            <option value="Leak Repairs">Leak Repairs</option><option value="Drain Cleaning">Drain Cleaning</option><option value="Boiler Service">Boiler Service</option><option value="Bathroom Plumbing">Bathroom Plumbing</option><option value="Pipe Installation">Pipe Installation</option><option value="Emergency Plumbing">Emergency Plumbing</option>
+          </select></div>
+          <div class="field"><label for="scope">Example job size</label><select id="scope" name="scope"><option value="1">Small — base range</option><option value="1.4">Medium — +40% example adjustment</option><option value="1.85">Large — +85% example adjustment</option></select><p class="field-help">These are invented multipliers for the interactive demo.</p></div>
+          <div class="field"><label for="urgency">Timing</label><select id="urgency" name="urgency"><option value="1">Standard hours</option><option value="1.5">After-hours — +50% example adjustment</option></select></div>
+          <p class="fine-print" id="estimate-note">No personal information is collected by this calculator. The calculated estimate is not saved or sent to MySQL.</p>
+        </form>
+        <div class="estimate-result" aria-live="polite" aria-atomic="true">
+          <p class="eyebrow">Your illustrative estimate</p>
+          <div id="estimateAmount" class="amount">£65–£115</div>
+          <p id="estimateSummary">Leak Repairs · Small · Standard hours</p>
+          <p>Not a binding quote. Materials, access, location and other circumstances are not assessed.</p>
+          <a class="price-button" href="index.html#home">Go to the quote form →</a>
+          <p class="fine-print" style="color:#d5eaf0">On the homepage, click “Request a Quote” to open the existing working form.</p>
+        </div>
+      </div>
+    </section>
+
+    <section aria-labelledby="next-heading">
+      <p class="eyebrow">How the demo works</p><h2 id="next-heading">From example price to request</h2>
+      <div class="steps"><div class="step"><strong>01 · Browse</strong><p>Look through the illustrative ranges for each service.</p></div><div class="step"><strong>02 · Explore</strong><p>Adjust job size and timing to see a sample estimate.</p></div><div class="step"><strong>03 · Request</strong><p>Return to the homepage and use the existing quote form to create a demo request.</p></div></div>
+    </section>
+  </div>
+</main>
+<footer class="prices-footer"><div class="prices-shell"><span>© <span id="year">2026</span> ABC Plumbing Services · Portfolio demonstration</span><a href="index.html">← Back to homepage</a></div></footer>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/js/bootstrap.bundle.min.js"></script>
+<script src="js/script.js"></script>
+<script>
+(function () {
+  'use strict';
+  const baseRanges = {
+    'Leak Repairs': [65, 115],
+    'Drain Cleaning': [75, 140],
+    'Boiler Service': [85, 135],
+    'Bathroom Plumbing': [110, 210],
+    'Pipe Installation': [100, 190],
+    'Emergency Plumbing': [125, 225]
+  };
+  const form = document.getElementById('estimateForm');
+  const service = document.getElementById('service');
+  const scope = document.getElementById('scope');
+  const urgency = document.getElementById('urgency');
+  const amount = document.getElementById('estimateAmount');
+  const summary = document.getElementById('estimateSummary');
+  const formatter = new Intl.NumberFormat('en-GB', {style: 'currency', currency: 'GBP', maximumFractionDigits: 0});
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  function updateEstimate() {
+    const range = baseRanges[service.value];
+    if (!range) { amount.textContent = 'Select a service'; summary.textContent = ''; return; }
+    const multiplier = Number(scope.value) * Number(urgency.value);
+    const lower = Math.round(range[0] * multiplier / 5) * 5;
+    const upper = Math.round(range[1] * multiplier / 5) * 5;
+    amount.textContent = formatter.format(lower) + '–' + formatter.format(upper);
+    const chosenSize = scope.selectedOptions[0].text.split(' — ')[0];
+    const chosenTiming = urgency.selectedOptions[0].text.split(' — ')[0];
+    summary.textContent = service.value + ' · ' + chosenSize + ' · ' + chosenTiming;
+  }
+  form.addEventListener('change', updateEstimate);
+  form.addEventListener('submit', function (event) {event.preventDefault();});
+  document.querySelectorAll('[data-select-service]').forEach(function (button) {
+    button.addEventListener('click', function () {
+      service.value = button.dataset.selectService;
+      urgency.value = '1';
+      updateEstimate();
+      document.getElementById('estimate').scrollIntoView({behavior: 'smooth', block: 'start'});
+      service.focus({preventScroll: true});
+    });
+  });
+  service.addEventListener('change', function () {
+    updateEstimate();
+  });
+  updateEstimate();
+})();
+</script>
+
+<!-- Animate prices content on scroll, without changing the calculator or navigation. -->
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+  if (!('IntersectionObserver' in window) ||
+      (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+    return;
+  }
+
+  const elements = document.querySelectorAll([
+    '.prices-content section > .eyebrow',
+    '.prices-content section > h2',
+    '.prices-content section > .section-intro',
+    '.prices-content .price-card',
+    '.prices-content .estimate',
+    '.prices-content .step'
+  ].join(', '));
+
+  if (!elements.length) return;
+
+  const observer = new IntersectionObserver(function (entries, activeObserver) {
+    entries.forEach(function (entry) {
+      if (!entry.isIntersecting) return;
+      entry.target.classList.add('abc-reveal-visible');
+      activeObserver.unobserve(entry.target);
+    });
+  }, { threshold: 0.08, rootMargin: '0px 0px -6% 0px' });
+
+  const firstRowCards = Array.from(document.querySelectorAll('.prices-content .price-card')).slice(0, 3);
+
+  elements.forEach(function (element, index) {
+    const firstRowIndex = firstRowCards.indexOf(element);
+    let delay = (index % 3) * 65;
+    if (element.id === 'prices-heading') delay = 60;
+    if (firstRowIndex !== -1) delay = 130 + firstRowIndex * 130;
+    element.style.setProperty('--abc-reveal-delay', delay + 'ms');
+    element.classList.add('abc-reveal-item');
+    observer.observe(element);
+  });
+  // Observe initially visible elements too, so their entrance is animated on load.
+  document.documentElement.classList.add('abc-reveal-enabled');
+});
+</script>
+</body>
+</html>
