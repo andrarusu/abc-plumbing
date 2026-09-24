@@ -124,6 +124,79 @@ document.addEventListener("DOMContentLoaded", function () {
        service, that service is selected automatically.
     ===================================================== */
 
+    /*
+       OPEN QUOTE MODAL FROM PRICES PAGE
+
+       Example:
+       index.html?quote=1&service=Leak%20Repairs#home
+    */
+
+    const pageParams =
+        new URLSearchParams(window.location.search);
+
+
+    if (
+        quoteModal &&
+        pageParams.get("quote") === "1"
+    ) {
+
+        const requestedService =
+            pageParams.get("service");
+
+
+        if (
+            requestedService &&
+            serviceSelect &&
+            Array.from(serviceSelect.options).some(
+                function (option) {
+                    return option.value === requestedService;
+                }
+            )
+        ) {
+
+            serviceSelect.value =
+                requestedService;
+
+        }
+
+
+        window.setTimeout(
+            function () {
+
+                const modal =
+                    bootstrap.Modal.getOrCreateInstance(
+                        quoteModal
+                    );
+
+
+                modal.show();
+
+
+                /*
+                    Remove the query string after opening
+                    so refreshing the page does not keep
+                    reopening the modal.
+                */
+
+                const cleanUrl =
+                    window.location.pathname +
+                    window.location.hash;
+
+
+                window.history.replaceState(
+                    {},
+                    document.title,
+                    cleanUrl
+                );
+
+            },
+            150
+        );
+
+    }
+
+
+
     if (quoteModal) {
 
         quoteModal.addEventListener(

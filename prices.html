@@ -325,6 +325,15 @@
 
                 <li class="nav-item">
 
+                    <a class="nav-link" href="index.html#faq">
+                        FAQ
+                    </a>
+
+                </li>
+
+
+                <li class="nav-item">
+
 
 
                     <a
@@ -425,7 +434,7 @@
           <div id="estimateAmount" class="amount">£65–£115</div>
           <p id="estimateSummary">Leak Repairs · Small · Standard hours</p>
           <p>Not a binding quote. Materials, access, location and other circumstances are not assessed.</p>
-          <a class="price-button" href="index.html#home">Go to the quote form →</a>
+          <a class="price-button" id="estimateQuoteButton" href="index.html?quote=1#home">Go to the quote form →</a>
           <p class="fine-print" style="color:#d5eaf0">On the homepage, click “Request a Quote” to open the existing working form.</p>
         </div>
       </div>
@@ -457,6 +466,7 @@
   const urgency = document.getElementById('urgency');
   const amount = document.getElementById('estimateAmount');
   const summary = document.getElementById('estimateSummary');
+  const quoteButton = document.getElementById('estimateQuoteButton');
   const formatter = new Intl.NumberFormat('en-GB', {style: 'currency', currency: 'GBP', maximumFractionDigits: 0});
   document.getElementById('year').textContent = new Date().getFullYear();
 
@@ -470,6 +480,9 @@
     const chosenSize = scope.selectedOptions[0].text.split(' — ')[0];
     const chosenTiming = urgency.selectedOptions[0].text.split(' — ')[0];
     summary.textContent = service.value + ' · ' + chosenSize + ' · ' + chosenTiming;
+    if (quoteButton) {
+      quoteButton.href = 'index.html?quote=1&service=' + encodeURIComponent(service.value) + '#home';
+    }
   }
   form.addEventListener('change', updateEstimate);
   form.addEventListener('submit', function (event) {event.preventDefault();});
