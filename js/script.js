@@ -91,6 +91,31 @@ document.addEventListener("DOMContentLoaded", function () {
         document.getElementById("formSuccess");
 
 
+    const isGitHubPages =
+        window.location.hostname === "andrarusu.github.io" ||
+        window.location.hostname.endsWith(".github.io");
+
+
+    const staffLinks =
+        document.querySelectorAll(".staff-link");
+
+
+    if (isGitHubPages) {
+
+        staffLinks.forEach(function (link) {
+
+            link.href =
+                "https://github.com/andrarusu/abc-plumbing/blob/main/staff_login.php";
+
+            link.target = "_blank";
+            link.rel = "noopener noreferrer";
+            link.textContent = "View Staff Login Code";
+
+        });
+
+    }
+
+
 
     /* =====================================================
        AUTOMATIC SERVICE SELECTION
@@ -470,51 +495,161 @@ document.addEventListener("DOMContentLoaded", function () {
                 );
 
 
-// Save the quote request through PHP and MySQL.
-fetch("submit_quote.php", {
-    method: "POST",
-    body: new FormData(quoteForm)
-})
-.then(async function (response) {
-    const result = await response.json();
+                /*
+                    PUBLIC GITHUB PAGES DEMO
 
-    if (!response.ok || !result.success) {
-        throw new Error(result.message || "Could not save the request.");
-    }
+                    GitHub Pages cannot run PHP/MySQL.
+                    Keep the form interactive and validated,
+                    but do not submit or store any data.
+                */
 
-    return result;
-})
-.then(function (result) {
-    if (formSuccess) {
-        const successTitle = formSuccess.querySelector("strong");
-        const successText = formSuccess.querySelector("p");
+                if (isGitHubPages) {
 
-        if (successTitle) {
-            successTitle.textContent = "Quote request saved.";
-        }
+                    if (formSuccess) {
 
-        if (successText) {
-            successText.textContent = result.message;
-        }
+                        const successTitle =
+                            formSuccess.querySelector("strong");
 
-        formSuccess.classList.remove("d-none");
-    }
+                        const successText =
+                            formSuccess.querySelector("p");
 
-    // Close the modal after the successful save.
-    window.setTimeout(function () {
-        const modalElement = document.getElementById("quoteModal");
-        const modal = modalElement
-            ? bootstrap.Modal.getInstance(modalElement)
-            : null;
 
-        if (modal) {
-            modal.hide();
-        }
-    }, 2500);
-})
-.catch(function (error) {
-    alert(error.message);
-});
+                        if (successTitle) {
+
+                            successTitle.textContent =
+                                "Demo request completed.";
+
+                        }
+
+
+                        if (successText) {
+
+                            successText.textContent =
+                                "No information was submitted or stored. This public preview demonstrates the form and client-side validation.";
+
+                        }
+
+
+                        formSuccess.classList.remove(
+                            "d-none"
+                        );
+
+
+                        formSuccess.scrollIntoView({
+                            behavior: "smooth",
+                            block: "nearest"
+                        });
+
+                    }
+
+
+                    return;
+
+                }
+
+
+                /*
+                    LOCAL / PHP HOSTING MODE
+
+                    Preserve the real project behaviour:
+                    submit_quote.php saves the request to MySQL.
+                */
+
+                fetch("submit_quote.php", {
+                    method: "POST",
+                    body: new FormData(quoteForm)
+                })
+                .then(async function (response) {
+
+                    const result =
+                        await response.json();
+
+
+                    if (
+                        !response.ok ||
+                        !result.success
+                    ) {
+
+                        throw new Error(
+                            result.message ||
+                            "Could not save the request."
+                        );
+
+                    }
+
+
+                    return result;
+
+                })
+                .then(function (result) {
+
+                    if (formSuccess) {
+
+                        const successTitle =
+                            formSuccess.querySelector("strong");
+
+                        const successText =
+                            formSuccess.querySelector("p");
+
+
+                        if (successTitle) {
+
+                            successTitle.textContent =
+                                "Quote request saved.";
+
+                        }
+
+
+                        if (successText) {
+
+                            successText.textContent =
+                                result.message;
+
+                        }
+
+
+                        formSuccess.classList.remove(
+                            "d-none"
+                        );
+
+                    }
+
+
+                    // Close the modal after the successful save.
+                    window.setTimeout(
+                        function () {
+
+                            const modalElement =
+                                document.getElementById(
+                                    "quoteModal"
+                                );
+
+
+                            const modal =
+                                modalElement
+                                    ? bootstrap.Modal.getInstance(
+                                        modalElement
+                                    )
+                                    : null;
+
+
+                            if (modal) {
+
+                                modal.hide();
+
+                            }
+
+                        },
+                        2500
+                    );
+
+                })
+                .catch(function (error) {
+
+                    alert(error.message);
+
+                });
+
 
             }
         );
